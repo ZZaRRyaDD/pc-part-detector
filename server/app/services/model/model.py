@@ -74,6 +74,7 @@ class YOLOWrapper(metaclass=Singleton):
             classes.append(item["name"])
         
         final_dict = {
+            'old_filename': filename,
             'filename': filename,
             'classes': classes,
             'image': result.orig_img,
@@ -84,19 +85,21 @@ class YOLOWrapper(metaclass=Singleton):
         self,
         filename: str,
         dir_save: str,
-        limit_frames: int = 15000,
     ) -> dict:
-        cap = cv2.VideoCapture(filename=str(filename))
-        filename = f"predict_{os.path.basename(filename)}"
-        file_name, file_extension = os.path.splitext(filename)
+        capture = cv2.VideoCapture(filename=str(filename))
+        new_filename = f"predict_{os.path.basename(filename)}"
+        file_name, file_extension = os.path.splitext(new_filename)
         path = os.path.join(self.media_path, dir_save, f"{file_name}{file_extension}")
         webm_path = os.path.join(self.media_path, dir_save, f"{file_name}.webm")
 
         lst_images = []
-        count_frames = 0
+
+        count_frames = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = capture.get(cv2.CAP_PROP_FPS)
+
         classes = set()
-        while cap.isOpened():
-            success, frame = cap.read()
+        while capture.isOpened() and count_frames >= -1:
+            success, frame = capture.read()
             if success:
                 result = self.model(
                     frame,
@@ -110,15 +113,13 @@ class YOLOWrapper(metaclass=Singleton):
                     frame = cv2.rectangle(frame, (x1, y1), (x2, y2), colors(int(box.cls), True), 2)
                     cls = int(box.cls[0])
                     classes.add(self.classes[cls])
-                    cv2.putText(frame, self.classes[cls], (max(0, x1), max(35, y1)), cv2.FONT_HERSHEY_DUPLEX, 2, (255, 255, 255), thickness=1)
+                    cv2.putText(frame, self.classes[cls], (max(0, x1), max(35, y1)), cv2.FONT_HERSHEY_DUPLEX, 1, (255, 255, 255), thickness=1)
             lst_images.append(frame)
-            count_frames += 1
-            if count_frames >= limit_frames:
-                break
+            count_frames -= 1
 
-        self.convert_images_to_video(lst_images, path, fps=30)
-        self.convert_images_to_video(lst_images, webm_path, fps=30, codec="vp80")
-        cap.release()
+        self.convert_images_to_video(lst_images, path, fps=fps)
+        self.convert_images_to_video(lst_images, webm_path, fps=fps, codec="vp80")
+        capture.release()
 
         final_dict = {
             'filename': filename,

@@ -1,8 +1,8 @@
 <template>
-    <div v-if="this.detectionTask.detection_items && this.detectionTask.detection_items.length" class="py-10">
+    <div v-if="this.detectionTask.detection_items?.length" class="py-10">
         <div v-for="item of this.detectionTask.detection_items" :key="item.id" class="my-3 pa-5 bg-teal-lighten-5 rounded-lg">
             {{ item.origin_file.split("/")[item.origin_file.split("/").length - 1] }}
-            <div v-if="item.classes.length">Обнаруженные классы: {{ item.classes }}</div>
+            <div v-if="item.classes?.length">Обнаруженные классы: {{ item.classes }}</div>
             <div v-else>Ничего не обнаружено</div>
             <div v-if="item.type === 'IMAGE'" class="d-flex">
                 <v-img

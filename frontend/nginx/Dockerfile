@@ -3,10 +3,10 @@ FROM node:lts-alpine as build-stage
 
 WORKDIR /app
 
-COPY ./frontend/package*.json ./
-COPY ./frontend/ .
-
+COPY ./app/package*.json ./
 RUN npm install
+
+COPY ./app/ .
 RUN npm run build
 
 # Nginx

@@ -6,14 +6,15 @@ volumes:
 
 services:
   nginx:
-    build:
-      context: .
-      dockerfile: ./nginx/Dockerfile
     restart: always
     ports:
       - 80:80
     depends_on:
       - server
+      - frontend
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
 
   postgres:
     image: postgres:14
@@ -28,6 +29,16 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     command: postgres -p ${POSTGRES_PORT}
+
+  frontend:
+    container_name: 'frontend'
+    build:
+      context: ./frontend
+      dockerfile: ./nginx/Dockerfile
+    expose:
+      - 80
+    depends_on:
+      - server
 
   server:
     container_name: 'server'
@@ -113,3 +124,28 @@ services:
       - postgres
       - redis
     command: celery --app=app.config.celery_app.celery_app beat --schedule=celerybeat-schedule --loglevel=INFO -f ./logs/celery_beat.log
+
+  flower:
+    container_name: 'flower'
+    restart: always
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      args:
+        MODE: "--without dev"
+        APP_HOME: "/server"
+    ports:
+      - "${FLOWER_PORT}:${FLOWER_PORT}"
+    environment:
+      - ENV=production
+      - CELERY_BROKER_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${REDIS_URL}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+    depends_on:
+      - redis
+      - celery_worker
+    command: celery --app=app.config.celery_app.celery_app flower --port=${FLOWER_PORT} --url_prefix=flower

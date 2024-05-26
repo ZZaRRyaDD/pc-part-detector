@@ -12,10 +12,12 @@ AVAILABLE_IMAGE_EXTENSIONS = set([
 AVAILABLE_VIDEO_EXTENSIONS = set([
     ".mp4",
     ".avi",
+    ".mov",
 ])
 
 
 async def get_file_type(file_extension: str) -> bool:
+    file_extension = file_extension.lower()
     if file_extension in AVAILABLE_VIDEO_EXTENSIONS:
         return DetectionItemType.VIDEO
 
