@@ -3,14 +3,14 @@ FROM node:lts-alpine as build-stage
 
 WORKDIR /app
 
-COPY ./app/package*.json ./
+COPY ./frontend/package*.json ./
 RUN npm install
 
-COPY ./app/ .
+COPY ./frontend/ .
 RUN npm run build
 
 # Nginx
-FROM nginx:stable-alpine as production-stage
+FROM nginx:1.19.2 as production-stage
 
 COPY --from=build-stage /app/dist /usr/share/nginx/html
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf

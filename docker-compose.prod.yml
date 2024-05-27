@@ -1,20 +1,20 @@
-version: '3'
-
 volumes:
   postgres_data:
   redis_data:
 
 services:
   nginx:
+    container_name: 'nginx'
     restart: always
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
     ports:
       - 80:80
     depends_on:
       - server
-      - frontend
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template
+    environment:
+      - FLOWER_PORT=${FLOWER_PORT}
 
   postgres:
     image: postgres:14
@@ -30,16 +30,6 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     command: postgres -p ${POSTGRES_PORT}
 
-  frontend:
-    container_name: 'frontend'
-    build:
-      context: ./frontend
-      dockerfile: ./nginx/Dockerfile
-    expose:
-      - 80
-    depends_on:
-      - server
-
   server:
     container_name: 'server'
     restart: always
@@ -53,6 +43,7 @@ services:
       - ${APP_PORT}
     volumes:
       - ./logs/:/server/logs/
+      - ./server/media/:/server/media/
     environment:
       - ENV=production
       - APP_PORT=${APP_PORT}
@@ -86,6 +77,7 @@ services:
         APP_HOME: "/server"
     volumes:
       - ./logs/:/server/logs/
+      - ./server/media/:/server/media/
     environment:
       - ENV=production
       - CELERY_BROKER_URL=${REDIS_URL}
@@ -98,7 +90,7 @@ services:
     depends_on:
       - postgres
       - redis
-    command: celery --app=app.config.celery_app.celery_app worker --loglevel=INFO -f ./logs/celery_worker.log
+    command: celery --app=app.config.celery_app.celery_app worker --pool=threads --loglevel=INFO -f ./logs/celery_worker.log
 
   celery_beat:
     container_name: 'celery_beat'
@@ -111,6 +103,7 @@ services:
         APP_HOME: "/server"
     volumes:
       - ./logs/:/server/logs/
+      - ./server/media/:/server/media/
     environment:
       - ENV=production
       - CELERY_BROKER_URL=${REDIS_URL}

@@ -45,23 +45,17 @@ async def run_detection(uuid: str, model: YOLOWrapper):
         mapper = {}
         loop = asyncio.get_running_loop()
         with ProcessPoolExecutor(max_workers=3) as pool:
-            print("выполнение задач")
             for item in items:
-                print(item.origin_file)
-                print(item)
                 mapper[item.origin_file] = item
                 task = loop.run_in_executor(pool, model.functions[item.type], item.origin_file, uuid)
                 tasks.append(task)
 
-        print("ожидание выполненных")        
         for task in asyncio.as_completed(tasks):
             result = await task
             obj = {
                 "predict_file": result['result_path'],
                 "classes": ",".join(set(result['classes'])),
             }
-            print(result["filename"])
-            print(mapper[result["filename"]])
             await detection_item_repository.update(
                 session,
                 db_obj=mapper[result["filename"]],

@@ -23,6 +23,8 @@ async def get_file_type(file_extension: str) -> bool:
 
     if file_extension in AVAILABLE_IMAGE_EXTENSIONS:
         return DetectionItemType.IMAGE
+    
+    return None
 
 
 async def check_files_extension(files: list) -> list[tuple[str, str]]:
@@ -34,13 +36,11 @@ async def check_files_extension(files: list) -> list[tuple[str, str]]:
         file_type = ""
         _, file_extension = os.path.splitext(file.filename)
         
-        if (
-            file_extension not in AVAILABLE_IMAGE_EXTENSIONS and 
-            file_extension not in AVAILABLE_VIDEO_EXTENSIONS
-        ):
+        file_type = await get_file_type(file_extension)
+
+        if not file_type:
             continue
 
-        file_type = await get_file_type(file_extension)
         uploaded_files.add(file)
         files_and_types.append((file, file_type))
     return files_and_types

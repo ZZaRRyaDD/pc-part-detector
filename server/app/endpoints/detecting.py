@@ -101,7 +101,9 @@ async def get_detection_task(
             detail="Детекция не завершена",
         )
     settings = get_settings()
-    base_url = f"http://localhost:{settings.APP_PORT}{settings.PATH_PREFIX}/"
+    base_url = f"http://localhost{settings.PATH_PREFIX}/"
+    if settings.ENV == "local":
+        base_url = f"http://localhost:{settings.APP_PORT}{settings.PATH_PREFIX}/"
     for item in task.detection_items:
         item.origin_file = urllib.parse.urljoin(base_url, item.origin_file)
         item.predict_file = urllib.parse.urljoin(base_url, item.predict_file)
