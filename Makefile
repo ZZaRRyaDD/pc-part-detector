@@ -81,16 +81,6 @@ open-db:  ##@Database Open database inside docker-image
 open-server:  ##@Application Open container inside docker-image
 	make docker-run-server "bash"
 
-test-docker:  ##@Testing Test application with pytest in docker
-	docker-compose -f docker-compose.test.yml up -d --build --remove-orphans
-	docker-compose -f docker-compose.test.yml run server $(TEST) || true
-	docker-compose -f docker-compose.test.yml down -v --remove-orphans
-
-test-cov-docker:  ##@Testing Test application with pytest and create coverage report
-	docker-compose -f docker-compose.test.yml up -d --build --remove-orphans
-	docker-compose -f docker-compose.test.yml run server $(TEST) --cov=$(APPLICATION_NAME) --cov-report html || true
-	docker-compose -f docker-compose.test.yml down -v --remove-orphans
-
 docker-clean:  ##@Application Remove all docker objects
 	docker system prune --all -f
 

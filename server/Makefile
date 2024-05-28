@@ -46,11 +46,5 @@ migrate:  ##@Database Do all migrations in database
 revision:  ##@Database Create new revision file automatically with prefix (ex. 2023_01_01_14cs34f_message.py)
 	cd $(APPLICATION_NAME)/db && alembic revision --autogenerate
 
-tests:  ##@Testing Test application with pytest
-	pytest --disable-pytest-warnings --verbosity=2 --showlocals --log-level=INFO --full-trace
-
-tests-cov:  ##@Testing Test application with pytest and create coverage report
-	pytest --disable-pytest-warnings --verbosity=2 --showlocals --log-level=INFO --full-trace --cov=$(APPLICATION_NAME) --cov-report html
-
 %::
 	echo $(MESSAGE)

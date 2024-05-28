@@ -74,7 +74,6 @@ class YOLOWrapper(metaclass=Singleton):
             classes.append(item["name"])
         
         final_dict = {
-            'old_filename': filename,
             'filename': filename,
             'classes': classes,
             'image': result.orig_img,
