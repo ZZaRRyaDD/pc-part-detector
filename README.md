@@ -8,21 +8,9 @@
 
 ### Запуск
 
-1. Запуск приложения:
+Запуск приложения:
 ```commandline
 make docker-run
-```
-
-### Тестирование
-
-- Запуск тестов со всеми необходимыми флагами:
-```commandline
-make test-docker
-```
-
-- Запуск тестов с генерацией отчета о покрытии:
-```commandline
-make test-cov-docker
 ```
 
 ### Статический анализ
@@ -43,6 +31,7 @@ make format
 ```commandline
 make revision
 ```
+
 - Открытие базы данных внутри Docker-контейнера:
 ```commandline
 make open-db

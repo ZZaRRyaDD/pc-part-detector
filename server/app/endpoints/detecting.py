@@ -39,7 +39,7 @@ api_router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     responses={
         status.HTTP_400_BAD_REQUEST: {
-            "description": "Files extensions is'not valid",
+            "description": "Файлы для предсказания отсутствуют",
         },
     },
 )
@@ -48,25 +48,31 @@ async def create_detection_task(
     files: list[UploadFile] = Form(...),
     session: AsyncSession = Depends(get_session),
 ):
-    upload_files = await check_files_extension(files)
-    if not upload_files:
+    if not files:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Files extensions is'not valid",
+            detail="Файлы для предсказания отсутствуют",
+        )
+    upload_files, message = await check_files_extension(files)
+    if message:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=message,
         )
     
     detection_task_repository = DetectionTaskRepository()
     detection_item_repository = DetectionItemRepository()
 
     detection_task = await detection_task_repository.create(session, obj_in={})
+    detection_task_id = str(detection_task.id)
     await create_items(
         request.app.state.file_service,
         session,
         detection_item_repository,
-        str(detection_task.id),
+        detection_task_id,
         upload_files,
     )
-    run_detection.delay(str(detection_task.id))
+    run_detection.delay(detection_task_id)
     return detection_task
 
 
@@ -115,7 +121,7 @@ async def get_detection_task(
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
-            "description": "Detection not found",
+            "description": "Задача детекции не найдена",
         },
     },
 )
@@ -129,7 +135,7 @@ async def download_detection_task(
     if not task:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Detection not found",
+            detail="Задача детекции не найдена",
         )
 
     zip_bytes_io = await archive_detection_task(task)

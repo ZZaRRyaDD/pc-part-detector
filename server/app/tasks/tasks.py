@@ -5,7 +5,7 @@ from app.services import YOLOWrapper
 from app.utils.celery import run_detection as run_detection_async
 
 
-model = YOLOWrapper(path="./app/services/model/weights/best.pt")
+model = YOLOWrapper(path="./app/services/model/weights/best.pt", conf=0.4, iou=0.6)
 
 
 @celery_app.task

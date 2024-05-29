@@ -27,7 +27,7 @@ api_router = APIRouter(
     status_code=status.HTTP_200_OK,
     responses={
         status.HTTP_404_NOT_FOUND: {
-            "description": "Detection not found",
+            "description": "Задача детекции не найдена",
         },
     },
 )

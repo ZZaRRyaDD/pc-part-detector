@@ -1,4 +1,5 @@
 import os
+from typing import Union
 
 from app.constants import DetectionItemType
 from app.schemas.detection import DetectionItemCreate
@@ -27,9 +28,10 @@ async def get_file_type(file_extension: str) -> bool:
     return None
 
 
-async def check_files_extension(files: list) -> list[tuple[str, str]]:
+async def check_files_extension(files: list) -> Union[list[tuple[str, str]], str]:
     files_and_types = []
     uploaded_files = set()
+    message = ""
     for file in files:
         if file in uploaded_files:
             continue
@@ -39,11 +41,12 @@ async def check_files_extension(files: list) -> list[tuple[str, str]]:
         file_type = await get_file_type(file_extension)
 
         if not file_type:
-            continue
+            message = f"Файлы с расширением {file_extension} не поддерживаются для совершения предсказания"
+            return files_and_types, message
 
         uploaded_files.add(file)
         files_and_types.append((file, file_type))
-    return files_and_types
+    return files_and_types, message
 
 
 async def create_items(
