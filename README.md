@@ -10,7 +10,7 @@
 
 Запуск приложения:
 ```commandline
-make docker-run
+make docker-up
 ```
 
 ### Статический анализ
