@@ -18,7 +18,7 @@ from app.utils.detection import get_file_type
 
 api_router = APIRouter(
     prefix="/media",
-    tags=["Detection"],
+    tags=["Media"],
 )
 
 
